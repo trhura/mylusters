@@ -43,6 +43,7 @@ TONES = [
 def unicode_repr (char):
     return repr(char)[3:-1].upper()
 
+
 def main ():
     table = {}
     MEDIALS.reverse ()
@@ -80,10 +81,6 @@ def main ():
                     break
             if tone: table[consonant][medial][vowel].setdefault(tone, {})
 
-    import pprint
-    with codecs.open ("test.txt", 'w') as ofile:
-        ofile.write (pprint.pformat(table))
-
     workbook = xlwt.Workbook ('utf-8')
     worksheet = workbook.add_sheet ("Grapheme Clusters")
 
@@ -92,14 +89,20 @@ def main ():
     CMR = len(MEDIALS) * MMR    # CONSONANT ROW SPAN RANGE
 
     default_style = xlwt.easyxf ('alignment:vertical top;'
-                                 'font: name TharLon;')
+                                 'borders: left thick;'
+                                 'borders: right thick;'
+                                 'borders: top thick;'
+                                 'borders: bottom thick;')
+
     invalid_style = xlwt.easyxf ('alignment:vertical top;'
-                                 'font: name TharLon;'
                                  'font: color gray25;'
                                  'font: struck_out True')
 
+    for i, heading in enumerate (['Consonants', 'Medials', 'Vowels', 'Tones']):
+        worksheet.write (0, i, heading)
+
     for i, consonant in enumerate(sorted(table.keys())):
-        worksheet.write_merge ((CMR*i), CMR+(CMR*i)-1,
+        worksheet.write_merge ((CMR*i)+1, CMR+(CMR*i),
                                0, 0,
                                consonant,
                                default_style)
@@ -109,7 +112,7 @@ def main ():
             if not table[consonant].has_key (medial):
                 style = invalid_style
 
-            worksheet.write_merge ((CMR*i)+(MMR*j), (CMR*i)+(MMR*j)+MMR-1,
+            worksheet.write_merge ((CMR*i)+(MMR*j)+1, (CMR*i)+(MMR*j)+MMR,
                                    1, 1,
                                    consonant + (medial if medial else ''),
                                    style)
@@ -120,7 +123,7 @@ def main ():
                     table[consonant][medial].has_key (vowel)):
                     style = invalid_style
 
-                worksheet.write_merge ((CMR*i)+(MMR*j)+(VMR*k), (CMR*i)+(MMR*j)+(VMR*k)+VMR-1,
+                worksheet.write_merge ((CMR*i)+(MMR*j)+(VMR*k)+1, (CMR*i)+(MMR*j)+(VMR*k)+VMR,
                                        2, 2,
                                        consonant + (medial if medial else '') + vowel,
                                        style)
@@ -132,9 +135,36 @@ def main ():
                             table[consonant][medial][vowel].has_key (tone)):
                         style = invalid_style
 
-                    worksheet.write ((CMR*i)+(MMR*j)+(VMR*k) + l,
+                    worksheet.write ((CMR*i)+(MMR*j)+(VMR*k)+l+1,
                                      3,
                                      consonant + (medial if medial else '') + vowel + tone, style)
+
+
+    for i in range (1, CMR * len(table.keys()), 1):
+        if (i - 1) % CMR == 0:
+            continue
+
+        worksheet.row(i).level = 1
+
+        if (i - 1) % MMR == 0:
+            continue
+
+        worksheet.row(i).level = 2
+
+
+    worksheet.col(0).width = 25 * 256
+    worksheet.col(1).width = 25 * 256
+    worksheet.col(2).width = 25 * 256
+    worksheet.col(3).width = 25 * 256
+
+    import itertools
+    try:
+        for i in itertools.count ():
+            worksheet.row(i).height = 3 * 256
+            worksheet.row(i).height_mismatch = 1
+    except:
+        pass
+
 
     workbook.save ('clusters.xls')
 
