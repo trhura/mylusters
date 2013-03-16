@@ -91,18 +91,20 @@ def main ():
     MMR = len(VOWELS)  * VMR    # MEDIALS ROW SPAN RANGE
     CMR = len(MEDIALS) * MMR    # CONSONANT ROW SPAN RANGE
 
-    default_style = xlwt.easyxf ('alignment:vertical top;')
+    default_style = xlwt.easyxf ('alignment:vertical top;'
+                                 'font: name TharLon;')
     invalid_style = xlwt.easyxf ('alignment:vertical top;'
-                                 'pattern: pattern solid;'
-                                 'pattern: fore_color red;')
+                                 'font: name TharLon;'
+                                 'font: color gray25;'
+                                 'font: struck_out True')
 
-    for i, consonant in enumerate(table.keys()):
+    for i, consonant in enumerate(sorted(table.keys())):
         worksheet.write_merge ((CMR*i), CMR+(CMR*i)-1,
                                0, 0,
                                consonant,
                                default_style)
 
-        for j, medial in enumerate(MEDIALS):
+        for j, medial in enumerate(sorted(MEDIALS)):
             style = default_style
             if not table[consonant].has_key (medial):
                 style = invalid_style
@@ -112,7 +114,7 @@ def main ():
                                    consonant + (medial if medial else ''),
                                    style)
 
-            for k, vowel in enumerate(VOWELS):
+            for k, vowel in enumerate(sorted(VOWELS)):
                 style = default_style
                 if  not (table[consonant].has_key (medial) and \
                     table[consonant][medial].has_key (vowel)):
@@ -124,12 +126,15 @@ def main ():
                                        style)
 
                 for l, tone in enumerate (TONES):
-                    if  table[consonant].has_key (medial) and \
-                        table[consonant][medial].has_key (vowel) and \
-                        table[consonant][medial][vowel].has_key (tone):
-                        worksheet.write ((CMR*i)+(MMR*j)+(VMR*k) + l,
-                                         3,
-                                         consonant + (medial if medial else '') + vowel + tone)
+                    style = default_style
+                    if  not (table[consonant].has_key (medial) and \
+                            table[consonant][medial].has_key (vowel) and \
+                            table[consonant][medial][vowel].has_key (tone)):
+                        style = invalid_style
+
+                    worksheet.write ((CMR*i)+(MMR*j)+(VMR*k) + l,
+                                     3,
+                                     consonant + (medial if medial else '') + vowel + tone, style)
 
     workbook.save ('clusters.xls')
 
