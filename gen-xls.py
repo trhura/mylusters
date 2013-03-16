@@ -98,13 +98,36 @@ def main ():
                                  'font: color gray25;'
                                  'font: struck_out True')
 
+    empty_medial_style = xlwt.easyxf ('pattern: pattern solid;'
+                                      'borders: left thick;'
+                                      'borders: right thick;'
+                                      'borders: top thick;'
+                                      'borders: bottom thick;'
+                                      'pattern: fore_color gray25')
+
+    header_style  = xlwt.easyxf ('alignment:vertical top;'
+                                 'borders: left thick;'
+                                 'borders: right thick;'
+                                 'borders: top thick;'
+                                 'borders: bottom thick;'
+                                 'font: bold True;'
+                                 'font: shadow True;'
+                                 'font: height 300;')
+
     for i, heading in enumerate (['Consonants', 'Medials', 'Vowels', 'Tones']):
-        worksheet.write (0, i, heading)
+        worksheet.write (0, i, heading, header_style)
+
+    worksheet.panes_frozen = True
+    worksheet.horz_split_pos = 1
+
+    def uni_repr (string):
+        utf_repr = u' '.join ([repr(c)[3:-1] for c in string]).replace ("u", "U+").upper ()
+        return string + ' (' + utf_repr + ')'
 
     for i, consonant in enumerate(sorted(table.keys())):
         worksheet.write_merge ((CMR*i)+1, CMR+(CMR*i),
                                0, 0,
-                               consonant,
+                               uni_repr(consonant),
                                default_style)
 
         for j, medial in enumerate(sorted(MEDIALS)):
@@ -114,8 +137,8 @@ def main ():
 
             worksheet.write_merge ((CMR*i)+(MMR*j)+1, (CMR*i)+(MMR*j)+MMR,
                                    1, 1,
-                                   consonant + (medial if medial else ''),
-                                   style)
+                                   uni_repr(consonant + medial) if medial else '',
+                                   style if medial else empty_medial_style)
 
             for k, vowel in enumerate(sorted(VOWELS)):
                 style = default_style
@@ -125,7 +148,7 @@ def main ():
 
                 worksheet.write_merge ((CMR*i)+(MMR*j)+(VMR*k)+1, (CMR*i)+(MMR*j)+(VMR*k)+VMR,
                                        2, 2,
-                                       consonant + (medial if medial else '') + vowel,
+                                       uni_repr(consonant + (medial if medial else '') + vowel),
                                        style)
 
                 for l, tone in enumerate (TONES):
@@ -137,25 +160,23 @@ def main ():
 
                     worksheet.write ((CMR*i)+(MMR*j)+(VMR*k)+l+1,
                                      3,
-                                     consonant + (medial if medial else '') + vowel + tone, style)
+                                     uni_repr(consonant + (medial if medial else '') + vowel + tone), style)
 
 
     for i in range (1, CMR * len(table.keys()), 1):
         if (i - 1) % CMR == 0:
             continue
-
         worksheet.row(i).level = 1
 
         if (i - 1) % MMR == 0:
             continue
-
         worksheet.row(i).level = 2
 
 
-    worksheet.col(0).width = 25 * 256
-    worksheet.col(1).width = 25 * 256
-    worksheet.col(2).width = 25 * 256
-    worksheet.col(3).width = 25 * 256
+    worksheet.col(0).width = 20 * 256
+    worksheet.col(1).width = 30 * 256
+    worksheet.col(2).width = 40 * 256
+    worksheet.col(3).width = 50 * 256
 
     import itertools
     try:
