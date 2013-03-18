@@ -167,11 +167,14 @@ def main ():
         if (i - 1) % CMR == 0:
             continue
         worksheet.row(i).level = 1
+        worksheet.row(i).hidden = True
+        worksheet.row(i).collapse = True
 
         if (i - 1) % MMR == 0:
             continue
         worksheet.row(i).level = 2
-
+        worksheet.row(i).hidden = True
+        worksheet.row(i).collapse = True
 
     worksheet.col(0).width = 20 * 256
     worksheet.col(1).width = 30 * 256
