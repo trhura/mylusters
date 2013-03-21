@@ -23,10 +23,10 @@ VOWELS = [
     VOWEL_SIGN_E,
     VOWEL_SIGN_AI,
     SIGN_ANUSVARA,
-    SIGN_ANUSVARA   + VOWEL_SIGN_U,
-    VOWEL_SIGN_I    + VOWEL_SIGN_U,
-    VOWEL_SIGN_E    + VOWEL_SIGN_AA,
-    VOWEL_SIGN_E    + VOWEL_SIGN_AA + SIGN_ASAT,
+    VOWEL_SIGN_U + SIGN_ANUSVARA ,
+    VOWEL_SIGN_I + VOWEL_SIGN_U,
+    VOWEL_SIGN_E + VOWEL_SIGN_AA,
+    VOWEL_SIGN_E + VOWEL_SIGN_AA + SIGN_ASAT,
 ]
 
 TONES = [
@@ -45,7 +45,7 @@ def main ():
     MEDIALS.reverse ()
     VOWELS.reverse ()
 
-    with codecs.open ('syllables-more', 'r', 'utf8') as fil:
+    with codecs.open ('alls', 'r', 'utf8') as fil:
         for line in fil:
             line = line.replace (u'\u102B', u'\u102C')
             line = line.strip ()
@@ -67,10 +67,15 @@ def main ():
 
             table[medial][vowel] = True
 
-    with codecs.open ('mv-test-more.txt', 'w', 'utf8') as ofil:
+    def uni_repr (string):
+        utf_repr = u' '.join ([repr(c)[3:-1] for c in string]).replace ("u", "U+").upper ()
+        return string + '\t(' + utf_repr + ')'
+
+    with codecs.open ('mv-test.txt', 'w', 'utf8') as ofil:
         for m in sorted(MEDIALS):
             for v in sorted(VOWELS):
-                ofil.write ('\t' + m + '\t+\t' + v + '\t=\t' + repr(table[m][v]) + '\n')
+                ofil.write ((u'\u2713' if table[m][v] else u'\u2716') + '\t' +
+                            uni_repr(m) + '\t+\t' + uni_repr(v) + '\n')
 
 if __name__ == "__main__":
     main ()
