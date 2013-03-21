@@ -2,6 +2,7 @@
 # -*- coding: utf-8 -*-
 
 from myanmar.language import *
+from myanmar import  converter
 
 import xlwt
 import codecs
@@ -119,14 +120,18 @@ def main ():
     worksheet.panes_frozen = True
     worksheet.horz_split_pos = 1
 
-    def uni_repr (string):
-        utf_repr = u' '.join ([repr(c)[3:-1] for c in string]).replace ("u", "U+").upper ()
-        return string + ' (' + utf_repr + ')'
+    zfil  = codecs.open ('zlog.txt', 'w', 'utf8')
+
+    def zgy_repr (string):
+        zgy_string = converter.convert(string, 'unicode', 'zawgyi')
+        #zfil.write (zgy_string + u'\t\t' + string + u'\n')
+        utf_repr = u' '.join ([repr(c)[3:-1] for c in zgy_string]).replace ("u", "U+").upper ()
+        return zgy_string + ' (' + utf_repr + ')'
 
     for i, consonant in enumerate(sorted(table.keys())):
         worksheet.write_merge ((CMR*i)+1, CMR+(CMR*i),
                                0, 0,
-                               uni_repr(consonant),
+                               zgy_repr(consonant),
                                default_style)
 
         for j, medial in enumerate(sorted(MEDIALS)):
@@ -136,7 +141,7 @@ def main ():
 
             worksheet.write_merge ((CMR*i)+(MMR*j)+1, (CMR*i)+(MMR*j)+MMR,
                                    1, 1,
-                                   uni_repr(consonant + medial) if medial else '',
+                                   zgy_repr(consonant + medial) if medial else '',
                                    style if medial else empty_medial_style)
 
             for k, vowel in enumerate(sorted(VOWELS)):
@@ -147,7 +152,7 @@ def main ():
 
                 worksheet.write_merge ((CMR*i)+(MMR*j)+(VMR*k)+1, (CMR*i)+(MMR*j)+(VMR*k)+VMR,
                                        2, 2,
-                                       uni_repr(consonant + (medial if medial else '') + vowel),
+                                       zgy_repr(consonant + (medial if medial else '') + vowel),
                                        style)
 
                 for l, tone in enumerate (TONES):
@@ -159,8 +164,7 @@ def main ():
 
                     worksheet.write ((CMR*i)+(MMR*j)+(VMR*k)+l+1,
                                      3,
-                                     uni_repr(consonant + (medial if medial else '') + vowel + tone), style)
-
+                                     zgy_repr(consonant + (medial if medial else '') + vowel + tone), style)
 
     for i in range (1, CMR * len(table.keys()), 1):
         if (i - 1) % CMR == 0:
@@ -188,8 +192,8 @@ def main ():
     except:
         pass
 
-
-    workbook.save ('clusters.xls')
+    zfil.close ()
+    workbook.save ('zgy-clusters.xls')
 
 if __name__ == "__main__":
     main ()
