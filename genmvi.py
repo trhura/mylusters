@@ -47,6 +47,7 @@ def main ():
 
     with codecs.open ('syllables-more', 'r', 'utf8') as fil:
         for line in fil:
+            line = line.replace (u'\u102B', u'\u102C')
             line = line.strip ()
             if not line: continue
 
