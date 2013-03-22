@@ -51,21 +51,14 @@ def main ():
             line = line.strip ()
             if not line: continue
 
-            medial = None
-            for m in MEDIALS:
-                if m in line:
-                    medial = m
-                    break
-            if not medial: continue
-
-            vowel  = None
-            for v in VOWELS:
-                if v in line:
-                    vowel = v
-                    break
-            if not vowel: continue
-
-            table[medial][vowel] = True
+            for medial in MEDIALS:
+                if medial in line:
+                    try:
+                        for vowel in VOWELS:
+                            if line[line.find (medial) + len(medial):].startswith (vowel):
+                                table[medial][vowel] = True
+                    except:
+                        continue
 
     def uni_repr (string):
         utf_repr = u' '.join ([repr(c)[3:-1] for c in string]).replace ("u", "U+").upper ()
